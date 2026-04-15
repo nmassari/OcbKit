@@ -1,25 +1,40 @@
 # OcbKit
+
 [![npm](https://img.shields.io/npm/v/@nmassari/ocbkit)](https://www.npmjs.com/package/@nmassari/ocbkit)
 [![license](https://img.shields.io/npm/l/@nmassari/ocbkit)](https://github.com/nmassari/ocbkit/blob/main/LICENSE)
 
-**OcbKit** is a TypeScript client library for interacting with the **OnchainBridge API**, enabling seamless swaps between **Bitcoin on-chain** and the **Lightning Network**.
+**OcbKit** is a TypeScript client for the **OnchainBridge API**, enabling seamless swaps between **Bitcoin on-chain** and the **Lightning Network**.
 
-It provides a simple and developer-friendly interface to:
-
-* Convert on-chain BTC → Lightning payments
-* Convert Lightning payments → on-chain BTC
-* Track swap status in real time
+It is designed to be simple, reliable, and production-ready.
 
 ---
 
-## 🚀 Features
+## ⚡ What you can do
 
-* ⚡ On-chain → Lightning (submarine swaps)
-* 🔄 Lightning → on-chain (reverse swaps)
-* 🔑 API key authentication
-* 🔁 Built-in polling for swap completion
-* 🧠 Smart status handling (completed, failed, expired, refunded)
-* 🌐 Works in both Node.js and browser environments
+* 🔄 Convert **on-chain BTC → Lightning payments**
+* ⚡ Convert **Lightning → on-chain BTC**
+* 🔁 Track swaps in real time
+* 🔑 Use API keys with rate-limited backend
+* 🧠 Handle swap lifecycle (pending → completed / failed)
+
+---
+
+## 🧩 Architecture
+
+OcbKit is part of a modular stack:
+
+* **OcbKit** → swap client (this library)
+* **OnchainBridge** → backend swap service (powered by Boltz)
+* **NwcKit** → Lightning payments via Nostr Wallet Connect
+
+Typical flow:
+
+```text
+User → NwcKit (wallet)
+     → OcbKit (swap request)
+     → OnchainBridge (Boltz)
+     → Bitcoin / Lightning
+```
 
 ---
 
@@ -31,10 +46,10 @@ npm install @nmassari/ocbkit
 
 ---
 
-## 🔧 Configuration
+## 🔧 Setup
 
 ```ts
-import { OcbClient } from "ocbkit"
+import { OcbClient } from "@nmassari/ocbkit"
 
 const ocb = new OcbClient({
   baseUrl: "https://ocb.easycryptosend.it",
@@ -52,13 +67,16 @@ const swap = await ocb.fundLightningFromOnchain({
   invoice: "lnbc..."
 })
 
-console.log("Send BTC to:", swap.depositAddress)
+console.log("Deposit address:", swap.depositAddress)
 console.log("BIP21:", swap.bip21)
 
+// wait completion
 const result = await ocb.waitForFinalStatus(swap.swapId)
 
 console.log("Final status:", result.status)
 ```
+
+👉 The user must send BTC to the returned address.
 
 ---
 
@@ -72,7 +90,7 @@ const swap = await ocb.withdrawLightningToOnchain({
 
 console.log("Pay this invoice:", swap.invoice)
 
-// Pay with your Lightning wallet (e.g. NWC)
+// pay invoice using your wallet (e.g. NwcKit)
 
 const result = await ocb.waitForFinalStatus(swap.swapId)
 
@@ -93,7 +111,7 @@ const result = await ocb.waitForFinalStatus(swapId, {
 
 ---
 
-## 📡 API Overview
+## 📡 API Coverage
 
 OcbKit wraps the following endpoints:
 
@@ -104,18 +122,34 @@ OcbKit wraps the following endpoints:
 
 ---
 
-## 🧩 Related Projects
+## ⚠️ Important notes
 
-* **NwcKit** → Lightning payments via Nostr Wallet Connect
-* **OnchainBridge** → backend swap service powered by Boltz
+* Minimum amount for on-chain → Lightning: **25,000 sats**
+* Lightning → on-chain requires a valid Bitcoin address
+* Swap status may require refresh or polling
+* Final states include: `completed`, `failed`, `expired`, `refunded`
 
 ---
 
-## ⚠️ Notes
+## 🧪 Example: Full flow (with Lightning wallet)
 
-* Minimum amount for on-chain → Lightning is **25000 sats**
-* Lightning → on-chain requires a valid Bitcoin address
-* Swap status may require refresh or polling
+```ts
+// 1. create swap
+const swap = await ocb.withdrawLightningToOnchain({
+  amountSats: 50000,
+  destinationAddress: "bc1q..."
+})
+
+// 2. pay invoice via NwcKit (or other LN wallet)
+// await nwc.payInvoice({ invoice: swap.invoice })
+
+// 3. wait completion
+const result = await ocb.waitForFinalStatus(swap.swapId)
+
+if (result.status === "completed") {
+  console.log("BTC received on-chain")
+}
+```
 
 ---
 
