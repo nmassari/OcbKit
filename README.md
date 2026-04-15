@@ -155,7 +155,7 @@ if (result.status === "completed") {
 
 ## 📄 License
 
-MIT
+ISC
 
 ---
 
