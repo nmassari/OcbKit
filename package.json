@@ -1,0 +1,25 @@
+{
+  "name": "ocbkit",
+  "version": "1.0.0",
+  "description": "TypeScript client for OnchainBridge",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "type": "commonjs",
+  "scripts": {
+    "build": "tsc",
+    "clean": "rm -rf dist",
+    "prepare": "npm run build"
+  },
+  "keywords": [
+    "bitcoin",
+    "lightning",
+    "boltz",
+    "swap"
+  ],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "typescript": "^5.8.0",
+    "@types/node": "^20.0.0"
+  }
+}
