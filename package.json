@@ -1,5 +1,5 @@
 {
-  "name": "ocbkit",
+  "name": "@nmassari/ocbkit",
   "version": "1.0.0",
   "description": "TypeScript client for OnchainBridge",
   "main": "dist/index.js",

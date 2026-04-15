@@ -1,4 +1,6 @@
 # OcbKit
+[![npm](https://img.shields.io/npm/v/@nmassari/ocbkit)](https://www.npmjs.com/package/@nmassari/ocbkit)
+[![license](https://img.shields.io/npm/l/@nmassari/ocbkit)](https://github.com/nmassari/ocbkit/blob/main/LICENSE)
 
 **OcbKit** is a TypeScript client library for interacting with the **OnchainBridge API**, enabling seamless swaps between **Bitcoin on-chain** and the **Lightning Network**.
 
@@ -24,7 +26,7 @@ It provides a simple and developer-friendly interface to:
 ## 📦 Installation
 
 ```bash
-npm install ocbkit
+npm install @nmassari/ocbkit
 ```
 
 ---
