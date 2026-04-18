@@ -17,25 +17,30 @@ export class OcbClient {
   private readonly apiKey: string
   private readonly fetchImpl: typeof fetch
 
-  constructor(config: OcbClientConfig) {
-    if (!config?.baseUrl?.trim()) {
-      throw new Error("OcbClient: baseUrl is required")
-    }
-
-    if (!config?.apiKey?.trim()) {
-      throw new Error("OcbClient: apiKey is required")
-    }
-
-    const fetchImpl = config.fetch ?? globalThis.fetch
-
-    if (!fetchImpl) {
-      throw new Error("OcbClient: fetch implementation not available")
-    }
-
-    this.baseUrl = config.baseUrl
-    this.apiKey = config.apiKey
-    this.fetchImpl = fetchImpl
+constructor(config: OcbClientConfig) {
+  if (!config?.baseUrl?.trim()) {
+    throw new Error("OcbClient: baseUrl is required")
   }
+
+  if (!config?.apiKey?.trim()) {
+    throw new Error("OcbClient: apiKey is required")
+  }
+
+  const fetchImpl =
+    config.fetch
+      ? config.fetch
+      : typeof globalThis.fetch === "function"
+        ? globalThis.fetch.bind(globalThis)
+        : undefined
+
+  if (!fetchImpl) {
+    throw new Error("OcbClient: fetch implementation not available")
+  }
+
+  this.baseUrl = config.baseUrl
+  this.apiKey = config.apiKey
+  this.fetchImpl = fetchImpl
+}
 
   async health(signal?: AbortSignal): Promise<OcbHealthResponse> {
     return await this.requestJson<OcbHealthResponse>("GET", "/api/bridge/health", undefined, signal)
@@ -176,7 +181,12 @@ export class OcbClient {
       throw new OcbApiError(message, response.status, parsed ?? rawText)
     }
 
-    return (parsed ?? ({} as T)) as T
+    const payload =
+      parsed && typeof parsed === "object" && "data" in (parsed as Record<string, unknown>)
+        ? (parsed as Record<string, unknown>).data
+        : parsed
+
+    return (payload ?? ({} as T)) as T
   }
 
   private tryParseJson(text: string): unknown | undefined {
