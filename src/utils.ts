@@ -46,17 +46,27 @@ export function isPlainObject(value: unknown): value is Record<string, unknown> 
 
 export function extractErrorMessage(body: unknown, fallback: string): string {
   if (typeof body === "string" && body.trim().length > 0) {
-    return body
+    return body.trim()
   }
 
   if (isPlainObject(body)) {
     const candidates = ["message", "error", "title", "detail"]
+    const messages: string[] = []
 
     for (const key of candidates) {
       const value = body[key]
-      if (typeof value === "string" && value.trim().length > 0) {
-        return value
+
+      if (typeof value === "string") {
+        const trimmed = value.trim()
+
+        if (trimmed.length > 0 && !messages.includes(trimmed)) {
+          messages.push(trimmed)
+        }
       }
+    }
+
+    if (messages.length > 0) {
+      return messages.join(" — ")
     }
   }
 
